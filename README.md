@@ -20,6 +20,7 @@ This template addresses recurring challenges in modern React development by prov
 ### Prerequisites
 - Docker
 - VS Code with GitHub Copilot extension
+- [Microsoft Playwright](https://github.com/microsoft/playwright) (for visual testing and browser automation)
 
 ### Setup
 ```bash
@@ -90,10 +91,6 @@ Deployment operations are managed through [configured tasks](.vscode/tasks.json)
 - [`.github/copilot-instructions.md`](.github/copilot-instructions.md) - AI development guidelines
 - [`docker-compose.yaml`](docker-compose.yaml) - Multi-environment container configuration
 - [`vite.config.ts`](vite.config.ts) - Build and development server configuration
-
-## Security
-
-Regular security auditing is integrated into the development workflow through automated dependency scanning and vulnerability assessment tools. See [SECURITY.md](SECURITY.md) for detailed security practices.
 
 ---
 
