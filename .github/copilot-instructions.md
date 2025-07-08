@@ -11,7 +11,7 @@ Every feature, component, and utility function—no matter how small—must be c
 ### 1. Strict Test-Driven Development (TDD) Workflow
 - For every new feature, bug fix, or change, always write the test(s) first. Do not write any implementation code until the test(s) are complete and saved.
 - Only after the test(s) are written and saved, write the minimum code needed to make the test(s) pass.
-- After each code change, always run the full test suite using `./test.sh` or `docker compose --profile test up app-test`.
+- After each code change, always run the full test suite using the VS Code task `Test: Run All Tests` or `docker compose --profile test up app-test`.
 - Repeat the cycle of writing code and running tests until all tests pass. Never stop this cycle unless you need clarifying answers from the user, or the user explicitly stops you.
 - Never write tests and implementation in the same step. Tests must always come first.
 - If a bug or missing feature is found, add a test for it before fixing.
@@ -89,13 +89,13 @@ Every feature, component, and utility function—no matter how small—must be c
 - **VS Code Tasks (Preferred)**: Use `Tasks: Run Task` menu for all development operations
   - `Dev: Start Development Server` - Starts dev server on port 5173
   - `Test: Run All Tests` - Runs test suite with verbose output  
-  - `Build: Production Build` - Creates production build
+  - `Build: Staging Build` - Creates production build
   - `Dev: Stop Development Server` - Stops development containers
-- **Direct Docker Commands** (when needed):
+- **Direct Docker Commands** (when VS Code tasks are unavailable):
   - `docker compose --profile dev up app-dev` (port 5173)
   - `docker compose --profile test up app-test` (verbose output)
   - `docker compose --profile build up app-build`
-- **Never use `npm run` commands directly** - always use Docker profiles or VS Code tasks
+- **Never use `npm run` commands directly** - always use VS Code tasks or Docker profiles
 
 #### State Management Best Practices
 - Use custom hooks for complex state logic
@@ -219,25 +219,19 @@ Every feature, component, and utility function—no matter how small—must be c
 
 ## Quick Reference Commands
 
-### Development
-```bash
-./dev.sh                    # Start development server
-./build.sh                  # Build for production  
-./test.sh                   # Run test suite
-```
+### VS Code Tasks (Primary Method)
+Use `Tasks: Run Task` in VS Code for all development operations:
+- `Dev: Start Development Server` - Start development server
+- `Test: Run All Tests` - Run test suite
+- `Build: Staging Build` - Build for production
+- `Dev: Stop Development Server` - Stop development containers
 
-### Docker Commands
+### Direct Docker Commands (Fallback)
 ```bash
 docker compose --profile dev up app-dev      # Development server
 docker compose --profile test up app-test    # Test runner
 docker compose --profile build up app-build  # Production build
 docker compose down                          # Stop all containers
-```
-
-### Testing
-```bash
-npm test                    # Run tests locally
-npm run test:coverage       # Run tests with coverage
 ```
 
 ---
@@ -270,7 +264,7 @@ This is a modern React/TypeScript application template with the following key ch
 - Clear separation of concerns between UI, logic, and data
 
 #### Docker-First Development
-- **Always use Docker commands or shell scripts**: `./dev.sh`, `./build.sh`, `./test.sh`
+- **Always use VS Code tasks or Docker commands**: Use `Tasks: Run Task` menu or direct Docker compose commands
 - Container setup ensures Node 24.3 environment with proper user permissions (1000:1000)
 - Dev server runs on port 5173 with host binding for container access
 - Consistent environment across development, testing, and production
