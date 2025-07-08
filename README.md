@@ -1,59 +1,20 @@
 # TypeScript React Vite Template
 
-A clean, modern template for building web applications with React, TypeScript, and Vite. Docker-first development with comprehensive VS Code integration.
+A production-ready template for building modern web applications. Optimized for AI-assisted development with GitHub Copilot and Claude Sonnet.
 
-## 🚀 Features
+## What You Get
 
-- **React 19** with TypeScript for type-safe development
-- **Vite 7** for fast development and optimized builds
-- **Tailwind CSS v4** for modern utility-first styling
-- **React Router** for client-side routing
-- **Vitest** with React Testing Library for testing
-- **Docker** setup for containerized development
-- **ESLint** for code quality and consistency
-- **VS Code Tasks** for streamlined development workflow
-- **AI-Optimized Development** with GitHub Copilot instructions and Claude Sonnet integration
-- **Security audit tasks** with automated fixes
-- **Production-ready** Dockerfile with nginx
+- **Modern Stack**: React 19, TypeScript 5.8, Vite 7, Tailwind CSS v4
+- **Zero Setup**: Docker handles everything - no Node.js installation needed
+- **AI-Ready**: Works seamlessly with GitHub Copilot and Claude Sonnet 4
+- **Production Ready**: Nginx deployment, security audits, health checks
+- **Test-Driven**: Vitest + React Testing Library with comprehensive coverage
 
-## 🤖 AI-Powered Development
+## Why This Template?
 
-This template is optimized for AI-assisted development with comprehensive instructions and tooling:
+**For AI Development**: Built-in instructions eliminate common AI coding mistakes and enforce best practices automatically.
 
-### GitHub Copilot Integration
-
-The template includes `.github/copilot-instructions.md` with detailed coding standards that:
-
-- **Enforce Test-Driven Development (TDD)** - Write tests first, implement second
-- **Maintain Code Quality** - TypeScript strict mode, ESLint rules, and documentation standards
-- **Streamline Workflows** - Docker-first development with VS Code task integration
-- **Prevent Common Issues** - Specific patterns for React, TypeScript, and Vite development
-- **Enable Consistent Architecture** - Hook-based state management and component patterns
-
-### Recommended AI Tools
-
-For optimal development experience, use this template with:
-
-- **Claude Sonnet 4** - Superior code reasoning and architectural decisions
-- **GitHub Copilot** - Code completion with project-specific context
-- **Playwright MCP Server** (by Microsoft) - Automated browser testing and interaction
-
-### Why These Instructions Matter
-
-The Copilot instructions eliminate common AI hallucinations by:
-
-1. **Defining exact workflows** - TDD cycle, Docker commands, VS Code tasks
-2. **Specifying project structure** - Where components, hooks, and tests belong
-3. **Enforcing standards** - TypeScript interfaces, documentation, and testing patterns
-4. **Providing context** - Understanding of Vite, Tailwind CSS v4, and React 19 patterns
-5. **Preventing errors** - Known issues with configurations and dependency management
-
-### Getting Started with AI Development
-
-1. **Read the instructions**: Check `.github/copilot-instructions.md` for complete guidelines
-2. **Use VS Code tasks**: AI agents understand the predefined development workflows
-3. **Follow TDD**: Write tests first, let AI implement the minimum code to pass
-4. **Leverage context**: The template structure provides clear patterns for AI to follow
+**For Developers**: One-click development with VS Code tasks. No configuration, no setup headaches.
 
 ## 📋 Prerequisites
 
