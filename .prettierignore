@@ -1,0 +1,23 @@
+# Prettier Ignore
+# Ignore build outputs
+dist/
+build/
+coverage/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore config files that shouldn't be formatted
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore generated files
+*.d.ts
+
+# Ignore Docker files
+Dockerfile
+.dockerignore
+
+# Ignore public assets
+public/

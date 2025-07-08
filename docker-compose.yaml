@@ -1,0 +1,91 @@
+networks:
+  public:
+    external: true
+  private:
+    external: true
+
+x-node-image: &node-image
+  image: node:${NODE_VERSION:-24.3.0}-alpine
+
+services:
+  app-build:
+    <<: *node-image
+    user: "1000:1000"
+    container_name: template-build
+    pull_policy: always
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sh -c "rm -rf node_modules/ && npm install && npm run build"
+    profiles:
+      - build
+
+  app-dev:
+    <<: *node-image
+    user: "1000:1000"
+    container_name: template-dev
+    pull_policy: always
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 5173:5173
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sh -c "rm -rf node_modules/ && npm install && npm run dev"
+    profiles:
+      - dev
+
+  app-test:
+    <<: *node-image
+    user: "1000:1000"
+    container_name: template-test
+    pull_policy: always
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sh -c "rm -rf node_modules/ && npm install && npm run test -- --run"
+    profiles:
+      - test
+
+  app-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: website-template-staging
+    restart: always
+    networks:
+      - private
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.template-staging.rule=Host(`test.ts.chis.dev`)"
+      - "traefik.http.routers.template-staging.entrypoints=websecure"
+      - "traefik.http.routers.template-staging.tls.certresolver=cloudflare"
+      - "traefik.http.services.template-staging.loadbalancer.server.port=80"
+      - "traefik.docker.network=private"
+    profiles:
+      - staging
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: website-template-prod
+    restart: always
+    networks:
+      - public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.template-prod.rule=Host(`test.chis.dev`)"
+      - "traefik.http.routers.template-prod.entrypoints=websecure"
+      - "traefik.http.routers.template-prod.tls.certresolver=cloudflare"
+      - "traefik.http.services.template-prod.loadbalancer.server.port=80"
+      - "traefik.docker.network=public"
+    profiles:
+      - prod

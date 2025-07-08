@@ -1,0 +1,404 @@
+{
+  "version": "2.0.0",
+  "inputs": [],
+  "tasks": [
+    {
+      "label": "Dev: Start Development Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "dev",
+        "up",
+        "app-dev"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "detail": "Start the development server with hot reload on port 5173"
+    },
+    {
+      "label": "Dev: Stop Development Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "dev",
+        "down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Stop the development server"
+    },
+    {
+      "label": "Test: Run All Tests",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "test",
+        "up",
+        "app-test"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "Run all tests with verbose output"
+    },
+    {
+      "label": "Build: Staging Build",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "build",
+        "up",
+        "app-build"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "Build the application for staging (creates dist/ folder)"
+    },
+    {
+      "label": "Prod: Deploy Production Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "prod",
+        "up",
+        "-d",
+        "--build",
+        "app"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "detail": "Build and deploy self-contained production server"
+    },
+    {
+      "label": "Prod: Stop Production Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "prod",
+        "down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Stop the production server"
+    },
+    {
+      "label": "Staging: Deploy Staging Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "staging",
+        "up",
+        "-d",
+        "app-staging"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "detail": "Deploy staging server using dist/ folder (requires build first)",
+      "dependsOn": [
+        "Build: Staging Build"
+      ]
+    },
+    {
+      "label": "Staging: Stop Staging Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "staging",
+        "down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Stop the staging server"
+    },
+    {
+      "label": "Health: Check Production Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "website-template-prod",
+        "curl",
+        "-s",
+        "localhost/health"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Check if production server is healthy"
+    },
+    {
+      "label": "Health: Check Staging Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "website-template-staging",
+        "curl",
+        "-s",
+        "localhost/health"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Check if staging server is healthy"
+    },
+    {
+      "label": "Deploy: Full Production Pipeline",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Prod: Deploy Production Server",
+        "Health: Check Production Server"
+      ],
+      "group": "build",
+      "detail": "Complete production deployment: build in Docker → deploy → health check"
+    },
+    {
+      "label": "Deploy: Full Staging Pipeline",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build: Staging Build",
+        "Staging: Deploy Staging Server",
+        "Health: Check Staging Server"
+      ],
+      "group": "build",
+      "detail": "Complete staging deployment: build dist/ → deploy → health check"
+    },
+    {
+      "label": "Docker: Clean All Containers",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Stop and remove all containers"
+    },
+    {
+      "label": "Docker: View Running Containers",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "ps"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Show all running Docker containers"
+    },
+    {
+      "label": "Clean: Remove node_modules and dist",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "node_modules",
+        "dist"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Clean build artifacts and dependencies"
+    },
+    {
+      "label": "Security: Audit Dependencies",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-v",
+        "${workspaceFolder}:/app",
+        "-w",
+        "/app",
+        "--user",
+        "1000:1000",
+        "node:24.3.0-alpine",
+        "sh",
+        "-c",
+        "npm install --silent && npm audit --audit-level=moderate"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "detail": "Run security audit on dependencies using Docker"
+    },
+    {
+      "label": "Security: Audit Dependencies (High)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-v",
+        "${workspaceFolder}:/app",
+        "-w",
+        "/app",
+        "--user",
+        "1000:1000",
+        "node:24.3.0-alpine",
+        "sh",
+        "-c",
+        "npm install --silent && npm audit --audit-level=high"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "detail": "Run security audit on dependencies (high severity only) using Docker"
+    },
+    {
+      "label": "Security: Fix Audit Issues",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-v",
+        "${workspaceFolder}:/app",
+        "-w",
+        "/app",
+        "--user",
+        "1000:1000",
+        "node:24.3.0-alpine",
+        "sh",
+        "-c",
+        "npm install --silent && npm audit fix"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "detail": "Automatically fix security vulnerabilities using Docker"
+    },
+    {
+      "label": "Security: Force Fix Audit Issues",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-v",
+        "${workspaceFolder}:/app",
+        "-w",
+        "/app",
+        "--user",
+        "1000:1000",
+        "node:24.3.0-alpine",
+        "sh",
+        "-c",
+        "npm install --silent && npm audit fix --force"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "detail": "Force fix security vulnerabilities (includes breaking changes) using Docker"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# robots.txt for TypeScript React Vite Template
+User-agent: *
+Allow: /
+
+# Add your sitemap URL here when deploying:
+# Sitemap: https://your-domain.com/sitemap.xml
