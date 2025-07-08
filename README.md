@@ -22,18 +22,19 @@ This template addresses recurring challenges in modern React development by prov
 - VS Code with GitHub Copilot extension
 - [Microsoft Playwright](https://github.com/microsoft/playwright) (for visual testing and browser automation)
 
-### Setup
-```bash
-git clone <repository-url>
-cd website-template
-code .
-```
-
 ### Development
-Interact with GitHub Copilot through the chat interface:
-- "Start the development server" → Launches development environment on `http://localhost:5173`
-- "Run the tests" → Executes comprehensive test suite
-- "Build for production" → Creates optimized production build
+1. **Clone and open the template:**
+   ```bash
+   git clone <repository-url>
+   cd website-template
+   code .
+   ```
+
+2. **Start developing with AI assistance:**
+   Interact with GitHub Copilot through the chat interface:
+   - "Start the development server" → Launches development environment on `http://localhost:5173`
+   - "Run the tests" → Executes comprehensive test suite
+   - "Build for production" → Creates optimized production build
 
 ## Architecture
 
