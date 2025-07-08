@@ -1,96 +1,100 @@
 # TypeScript React Vite Template
 
-My personal development template that I use for new React projects. Sharing in case it's useful for others.
+A production-ready React development template optimized for AI-assisted development workflows. This template eliminates common setup friction and enables immediate development through containerized environments and intelligent tooling integration.
 
-## Why I Built This
+## Overview
 
-I got tired of the same setup problems every time I wanted to prototype something:
+This template addresses recurring challenges in modern React development by providing a pre-configured environment that integrates seamlessly with AI development tools, containerized workflows, and production deployment pipelines.
 
-- **Paid platforms** work but cost money and have limitations
-- **Setting up from scratch** takes forever and something always breaks  
-- **Configuration issues** with TypeScript, Docker, AI tools, etc.
+### Key Features
 
-So I made this template that has all the pieces working together. Clone it, and you can start coding immediately.
+- **Modern Stack**: React 19, TypeScript 5.8, Vite 7.0, Tailwind CSS v4
+- **Containerized Development**: Docker-based environment requiring no local Node.js installation
+- **AI-Optimized Configuration**: Pre-configured for GitHub Copilot and Claude integration
+- **Production-Ready**: Nginx deployment configuration with security audits and health monitoring
+- **Comprehensive Testing**: Vitest and React Testing Library with automated coverage
+- **Visual Testing**: Playwright integration for browser automation and debugging
 
-## What's Included
+## Quick Start
 
-- **Modern Stack**: React 19, TypeScript 5.8, Vite 7, Tailwind CSS v4
-- **Docker Setup**: No Node.js installation needed, everything containerized
-- **AI Integration**: Configured for GitHub Copilot and Claude Sonnet 4
-- **Production Config**: Nginx deployment, security audits, health checks
-- **Testing Setup**: Vitest + React Testing Library
+### Prerequisites
+- Docker
+- VS Code with GitHub Copilot extension
 
-## How I Use It
+### Setup
+```bash
+git clone <repository-url>
+cd website-template
+code .
+```
 
-**For New Projects**: Clone this when I have an idea and want to start coding immediately.
+### Development
+Interact with GitHub Copilot through the chat interface:
+- "Start the development server" → Launches development environment on `http://localhost:5173`
+- "Run the tests" → Executes comprehensive test suite
+- "Build for production" → Creates optimized production build
 
-**For AI Development**: The configuration is already done so Copilot and Claude work without TypeScript errors or Docker issues.
+## Architecture
 
-**For Deployment**: I have my own Cloudflare + Docker setup, but you can deploy this anywhere.
-
-## Getting Started
-
-**You'll need**: Docker and VS Code with GitHub Copilot
-
-1. **Clone this repository**
-2. **Open in VS Code** 
-3. **Chat with Copilot**: "Start the development server"
-
-Your app will be at `http://localhost:5173` with hot reload.
-
-## Development Workflow
-
-Work naturally through the Copilot chat window:
-
-- **"Start the development server"** - Begin coding with hot reload
-- **"Run the tests"** - Execute your test suite  
-- **"Build for production"** - Create production build
-- **"Check for security issues"** - Audit dependencies
-
-The template includes VS Code tasks that Copilot automatically uses when you make these requests.
-
-## Project Structure
-
-Everything follows standard conventions:
+### Project Structure
 ```
 src/
-├── components/     # React components
-├── hooks/          # Custom hooks  
-├── utils/          # Helper functions
-├── __tests__/      # Test files
-└── App.tsx         # Main app
+├── components/          # React UI components
+├── hooks/              # Custom React hooks
+├── utils/              # Utility functions and helpers
+├── __tests__/          # Test files and mocks
+└── types.ts            # TypeScript type definitions
 ```
 
-## AI Development
+### Development Workflow
+The template leverages [VS Code tasks](.vscode/tasks.json) for standardized development operations and follows [comprehensive coding guidelines](.github/copilot-instructions.md) for AI-assisted development.
 
-This template is designed for chat-driven development:
+### Testing Strategy
+- **Unit Testing**: Component and hook isolation testing
+- **Integration Testing**: User interaction and workflow validation
+- **Visual Testing**: Playwright-based browser automation
+- **Coverage Requirements**: Minimum 80% coverage across all modules
 
-- **GitHub Copilot** - Just ask for what you need: "add a new component", "run tests", "deploy to staging"
-- **Claude Sonnet 4** - Handles complex architectural decisions and code reviews
-- **Playwright MCP Server** - Automates browser testing when requested
+## AI-Assisted Development
 
-The AI automatically uses the right VS Code tasks and follows the coding standards in `.github/copilot-instructions.md`.
+### GitHub Copilot Integration
+The template includes optimized [Copilot instructions](.github/copilot-instructions.md) that enable:
+- Automated task execution through VS Code integration
+- Test-driven development workflows
+- Code quality enforcement
+- Deployment automation
 
-## Visual Debugging with Playwright
-
-When Playwright is installed, you get powerful visual debugging:
-
-1. **"Start the dev server and open it in Playwright"** - AI launches your app in a controlled browser
-2. **"Take a screenshot of the current page"** - AI captures what you're seeing for analysis
-3. **"Navigate to the login form"** - You guide the AI to problem areas through chat
-4. **"I see the button is misaligned, can you confirm?"** - AI takes screenshots and validates issues
-5. **"Click through the user flow and test it"** - AI interacts with your app while you watch
-
-This creates a collaborative debugging session where you and the AI can both see the same browser state, identify visual issues together, and create targeted tests for the problems you find.
+### Visual Debugging Workflow
+When Playwright MCP Server is available:
+1. Launch development server in controlled browser environment
+2. Capture screenshots for visual validation
+3. Automate user interaction testing
+4. Generate targeted test cases for identified issues
 
 ## Deployment
 
-I use chat commands for deployment:
-- **"Deploy to staging"** - Runs staging deployment with health checks
-- **"Deploy to production"** - Production deployment with nginx
+### Environment Management
+- **Development**: Hot-reload development server with debugging tools
+- **Staging**: Production-like environment for pre-deployment validation
+- **Production**: Optimized nginx-served static assets with health monitoring
 
-**Note**: The deployment tasks are configured for my personal Cloudflare + Docker setup. You'll need to modify them for your own hosting.
+### Automation
+Deployment operations are managed through [configured tasks](.vscode/tasks.json):
+- Staging deployment with health checks
+- Production deployment with nginx configuration
+- Security audit and dependency management
+
+## Configuration Files
+
+- [`.vscode/tasks.json`](.vscode/tasks.json) - Development task automation
+- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) - AI development guidelines
+- [`docker-compose.yaml`](docker-compose.yaml) - Multi-environment container configuration
+- [`vite.config.ts`](vite.config.ts) - Build and development server configuration
+
+## Security
+
+Regular security auditing is integrated into the development workflow through automated dependency scanning and vulnerability assessment tools. See [SECURITY.md](SECURITY.md) for detailed security practices.
 
 ---
 
-**Feel free to use this template for your own projects. It's just my personal workflow that I'm sharing.**
+This template represents a streamlined approach to modern React development, emphasizing developer productivity through intelligent automation and standardized workflows.
