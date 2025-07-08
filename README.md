@@ -12,8 +12,48 @@ A clean, modern template for building web applications with React, TypeScript, a
 - **Docker** setup for containerized development
 - **ESLint** for code quality and consistency
 - **VS Code Tasks** for streamlined development workflow
+- **AI-Optimized Development** with GitHub Copilot instructions and Claude Sonnet integration
 - **Security audit tasks** with automated fixes
 - **Production-ready** Dockerfile with nginx
+
+## 🤖 AI-Powered Development
+
+This template is optimized for AI-assisted development with comprehensive instructions and tooling:
+
+### GitHub Copilot Integration
+
+The template includes `.github/copilot-instructions.md` with detailed coding standards that:
+
+- **Enforce Test-Driven Development (TDD)** - Write tests first, implement second
+- **Maintain Code Quality** - TypeScript strict mode, ESLint rules, and documentation standards
+- **Streamline Workflows** - Docker-first development with VS Code task integration
+- **Prevent Common Issues** - Specific patterns for React, TypeScript, and Vite development
+- **Enable Consistent Architecture** - Hook-based state management and component patterns
+
+### Recommended AI Tools
+
+For optimal development experience, use this template with:
+
+- **Claude Sonnet 4** - Superior code reasoning and architectural decisions
+- **GitHub Copilot** - Code completion with project-specific context
+- **Playwright MCP Server** (by Microsoft) - Automated browser testing and interaction
+
+### Why These Instructions Matter
+
+The Copilot instructions eliminate common AI hallucinations by:
+
+1. **Defining exact workflows** - TDD cycle, Docker commands, VS Code tasks
+2. **Specifying project structure** - Where components, hooks, and tests belong
+3. **Enforcing standards** - TypeScript interfaces, documentation, and testing patterns
+4. **Providing context** - Understanding of Vite, Tailwind CSS v4, and React 19 patterns
+5. **Preventing errors** - Known issues with configurations and dependency management
+
+### Getting Started with AI Development
+
+1. **Read the instructions**: Check `.github/copilot-instructions.md` for complete guidelines
+2. **Use VS Code tasks**: AI agents understand the predefined development workflows
+3. **Follow TDD**: Write tests first, let AI implement the minimum code to pass
+4. **Leverage context**: The template structure provides clear patterns for AI to follow
 
 ## 📋 Prerequisites
 
@@ -69,6 +109,8 @@ npm run dev
 │   ├── main.tsx            # Application entry point
 │   ├── index.css           # Global styles with Tailwind
 │   └── vite-env.d.ts       # Vite type definitions
+├── .github/
+│   └── copilot-instructions.md # AI development guidelines and workflows
 ├── .vscode/
 │   ├── tasks.json          # VS Code tasks for development
 │   ├── settings.json       # Project-specific VS Code settings
@@ -119,6 +161,7 @@ npm run dev
 - **`package.json`** - Project name, description, and dependencies
 - **`public/site.webmanifest`** - PWA configuration and app metadata
 - **`index.html`** - HTML meta tags and favicon references
+- **`.github/copilot-instructions.md`** - AI development guidelines and project-specific rules
 
 ### Adding New Features
 - **Components** - Create in `src/components/` with proper TypeScript interfaces
@@ -173,12 +216,14 @@ Deploy to production:
 
 ## 📈 Development Workflow
 
-1. **Start with tests** - Write tests first (TDD)
+1. **Start with tests** - Write tests first (TDD approach)
 2. **Use VS Code tasks** - Streamlined development commands
-3. **Run security audits** - Regular dependency checks
-4. **Deploy to staging** - Test before production
-5. **Monitor health** - Use built-in health checks
+3. **Follow AI guidelines** - Check `.github/copilot-instructions.md` for best practices
+4. **Leverage AI tools** - Use Claude Sonnet 4 and GitHub Copilot for optimal development
+5. **Run security audits** - Regular dependency checks
+6. **Deploy to staging** - Test before production
+7. **Monitor health** - Use built-in health checks
 
 ---
 
-**This template provides everything needed for modern React development with TypeScript, Docker, and production deployment. Start building! 🎉**
+**This template provides everything needed for modern React development with TypeScript, Docker, AI assistance, and production deployment. Perfect for AI-powered development workflows! 🤖🎉**
