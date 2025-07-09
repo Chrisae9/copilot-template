@@ -30,21 +30,28 @@ export const baseUrl = import.meta.env.BASE_URL
 export const config = {
     // App metadata
     app: {
-        name: import.meta.env.VITE_APP_NAME || 'TypeScript React Vite Template',
+        name: import.meta.env.VITE_APP_NAME || 'React App',
         version: import.meta.env.VITE_APP_VERSION || '1.0.0',
-        description: import.meta.env.VITE_APP_DESCRIPTION || 'A modern web application template',
     },
 
-    // API configuration
+    // Development configuration
+    dev: {
+        port: Number(import.meta.env.VITE_DEV_PORT) || 5173,
+        host: import.meta.env.VITE_DEV_HOST || 'localhost',
+        enableDevTools: import.meta.env.VITE_ENABLE_DEV_TOOLS === 'true' || isDevelopment,
+        enableStrictMode: import.meta.env.VITE_ENABLE_STRICT_MODE === 'true' || isDevelopment,
+    },
+
+    // API configuration (optional - only if you have a backend)
     api: {
-        baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-        timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
+        baseUrl: import.meta.env.VITE_API_BASE_URL || '',
+        timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 5000,
     },
 
-    // Feature flags
-    features: {
-        enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
-        enableLogging: import.meta.env.VITE_ENABLE_LOGGING === 'true' || isDevelopment,
+    // Playwright configuration
+    playwright: {
+        browser: import.meta.env.PLAYWRIGHT_BROWSER || 'chromium',
+        headless: import.meta.env.PLAYWRIGHT_HEADLESS !== 'false',
     },
 
     // Environment info
@@ -94,7 +101,7 @@ export function validateEnvVars(requiredVars: string[]): void {
  * devLog('User logged in', { userId: 123 })
  */
 export function devLog(message: string, data?: unknown): void {
-    if (isDevelopment || config.features.enableLogging) {
+    if (isDevelopment || config.dev.enableDevTools) {
         console.log(`[DEV] ${message}`, data || '')
     }
 }

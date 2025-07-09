@@ -3,7 +3,6 @@
         "github.copilot",
         "github.copilot-chat",
         "bradlc.vscode-tailwindcss",
-        "esbenp.prettier-vscode",
         "ms-vscode.vscode-eslint",
         "vitest.explorer"
     ]
