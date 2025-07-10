@@ -3,7 +3,37 @@
   "inputs": [],
   "tasks": [
     {
-      "label": "Dev: Start Development Server",
+      "label": "Utils: Install Node Modules (Docker)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-u",
+        "1000:1000",
+        "-v",
+        "${workspaceFolder}:/app",
+        "-w",
+        "/app",
+        "node:24.3.0-alpine",
+        "sh",
+        "-c",
+        "chmod +x scripts/bootstrap.sh && ./scripts/bootstrap.sh"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Install all node_modules for root, client, and server using Docker (for VS Code intellisense and Problems tab)"
+    },
+    // =============================================================================
+    // DEVELOPMENT TASKS
+    // =============================================================================
+    {
+      "label": "Dev: Start Full Stack",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -11,12 +41,15 @@
         "--profile",
         "dev",
         "up",
-        "app-dev"
+        "mongodb",
+        "client-dev",
+        "server-dev"
       ],
       "group": {
         "kind": "build",
-        "isDefault": false
+        "isDefault": true
       },
+      "isBackground": true,
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -25,12 +58,11 @@
         "showReuseMessage": true,
         "clear": false
       },
-      "isBackground": true,
       "problemMatcher": [],
-      "detail": "Start the development server with hot reload on port 5173"
+      "detail": "Start MongoDB + Client (5173) + Server (3001) for local development"
     },
     {
-      "label": "Dev: Stop Development Server",
+      "label": "Dev: Stop All",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -46,8 +78,11 @@
         "focus": false,
         "panel": "shared"
       },
-      "detail": "Stop the development server"
+      "detail": "Stop all development containers"
     },
+    // =============================================================================
+    // TESTING TASKS
+    // =============================================================================
     {
       "label": "Test: Run All Tests",
       "type": "shell",
@@ -57,7 +92,8 @@
         "--profile",
         "test",
         "up",
-        "app-test"
+        "--abort-on-container-exit",
+        "--build"
       ],
       "group": {
         "kind": "test",
@@ -70,75 +106,13 @@
         "panel": "shared"
       },
       "problemMatcher": [],
-      "detail": "Run all tests with verbose output"
+      "detail": "Run all client and server tests in Docker test containers (clean, reproducible) with correct user permissions to avoid EACCES errors."
     },
+    // =============================================================================
+    // STAGING DEPLOYMENT (Private Network - test.ts.chis.dev)
+    // =============================================================================
     {
-      "label": "Build: Staging Build",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "compose",
-        "--profile",
-        "build",
-        "up",
-        "app-build"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "problemMatcher": [],
-      "detail": "Build the application for staging (creates dist/ folder)"
-    },
-    {
-      "label": "Prod: Deploy Production Server",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "compose",
-        "--profile",
-        "prod",
-        "up",
-        "-d",
-        "--build",
-        "app"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "dedicated"
-      },
-      "detail": "Build and deploy self-contained production server"
-    },
-    {
-      "label": "Prod: Stop Production Server",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "compose",
-        "--profile",
-        "prod",
-        "down"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Stop the production server"
-    },
-    {
-      "label": "Staging: Deploy Staging Server",
+      "label": "Staging: Deploy",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -147,6 +121,8 @@
         "staging",
         "up",
         "-d",
+        "--build",
+        "mongodb",
         "app-staging"
       ],
       "group": "build",
@@ -156,13 +132,10 @@
         "focus": true,
         "panel": "dedicated"
       },
-      "detail": "Deploy staging server using dist/ folder (requires build first)",
-      "dependsOn": [
-        "Build: Staging Build"
-      ]
+      "detail": "Deploy to staging (test.ts.chis.dev) on private network"
     },
     {
-      "label": "Staging: Stop Staging Server",
+      "label": "Staging: Stop",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -178,76 +151,81 @@
         "focus": false,
         "panel": "shared"
       },
-      "detail": "Stop the staging server"
+      "detail": "Stop staging deployment"
     },
+    // =============================================================================
+    // PRODUCTION DEPLOYMENT (Public Network - catan.chis.dev)
+    // =============================================================================
     {
-      "label": "Health: Check Production Server",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "exec",
-        "website-template-prod",
-        "curl",
-        "-s",
-        "localhost/health"
-      ],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Check if production server is healthy"
-    },
-    {
-      "label": "Health: Check Staging Server",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "exec",
-        "website-template-staging",
-        "curl",
-        "-s",
-        "localhost/health"
-      ],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Check if staging server is healthy"
-    },
-    {
-      "label": "Deploy: Full Production Pipeline",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "Prod: Deploy Production Server",
-        "Health: Check Production Server"
-      ],
-      "group": "build",
-      "detail": "Complete production deployment: build in Docker → deploy → health check"
-    },
-    {
-      "label": "Deploy: Full Staging Pipeline",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "Build: Staging Build",
-        "Staging: Deploy Staging Server",
-        "Health: Check Staging Server"
-      ],
-      "group": "build",
-      "detail": "Complete staging deployment: build dist/ → deploy → health check"
-    },
-    {
-      "label": "Docker: Clean All Containers",
+      "label": "Prod: Deploy",
       "type": "shell",
       "command": "docker",
       "args": [
         "compose",
+        "--profile",
+        "prod",
+        "up",
+        "-d",
+        "--build",
+        "mongodb",
+        "app-prod"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "detail": "Deploy to production (catan.chis.dev) on public network"
+    },
+    {
+      "label": "Prod: Stop",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "--profile",
+        "prod",
         "down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Stop production deployment"
+    },
+    // =============================================================================
+    // UTILITY TASKS
+    // =============================================================================
+    {
+      "label": "Utils: View Containers",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "ps",
+        "-a"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Show all Docker containers"
+    },
+    {
+      "label": "Utils: Clean All",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "compose",
+        "down",
+        "--remove-orphans"
       ],
       "group": "build",
       "presentation": {
@@ -258,147 +236,6 @@
       },
       "detail": "Stop and remove all containers"
     },
-    {
-      "label": "Docker: View Running Containers",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "ps"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Show all running Docker containers"
-    },
-    {
-      "label": "Clean: Remove node_modules and dist",
-      "type": "shell",
-      "command": "rm",
-      "args": [
-        "-rf",
-        "node_modules",
-        "dist"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Clean build artifacts and dependencies"
-    },
-    {
-      "label": "Security: Audit Dependencies",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-v",
-        "${workspaceFolder}:/app",
-        "-w",
-        "/app",
-        "--user",
-        "1000:1000",
-        "node:24.3.0-alpine",
-        "sh",
-        "-c",
-        "npm install --silent && npm audit --audit-level=moderate"
-      ],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      },
-      "detail": "Run security audit on dependencies using Docker"
-    },
-    {
-      "label": "Security: Audit Dependencies (High)",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-v",
-        "${workspaceFolder}:/app",
-        "-w",
-        "/app",
-        "--user",
-        "1000:1000",
-        "node:24.3.0-alpine",
-        "sh",
-        "-c",
-        "npm install --silent && npm audit --audit-level=high"
-      ],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      },
-      "detail": "Run security audit on dependencies (high severity only) using Docker"
-    },
-    {
-      "label": "Security: Fix Audit Issues",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-v",
-        "${workspaceFolder}:/app",
-        "-w",
-        "/app",
-        "--user",
-        "1000:1000",
-        "node:24.3.0-alpine",
-        "sh",
-        "-c",
-        "npm install --silent && npm audit fix"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      },
-      "detail": "Automatically fix security vulnerabilities using Docker"
-    },
-    {
-      "label": "Security: Force Fix Audit Issues",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-v",
-        "${workspaceFolder}:/app",
-        "-w",
-        "/app",
-        "--user",
-        "1000:1000",
-        "node:24.3.0-alpine",
-        "sh",
-        "-c",
-        "npm install --silent && npm audit fix --force"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      },
-      "detail": "Force fix security vulnerabilities (includes breaking changes) using Docker"
-    }
+    // ...existing code...
   ]
 }

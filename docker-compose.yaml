@@ -1,91 +1,181 @@
+# =============================================================================
+# Simplified Docker Compose for Catan Game
+# =============================================================================
+
 networks:
   public:
     external: true
   private:
     external: true
-
-x-node-image: &node-image
-  image: node:${NODE_VERSION:-24.3.0}-alpine
+  catan-network:
+    driver: bridge
 
 services:
-  app-build:
-    <<: *node-image
-    user: "1000:1000"
-    container_name: template-build
-    pull_policy: always
+  # =============================================================================
+  # DEVELOPMENT ENVIRONMENT (Local)
+  # =============================================================================
+  
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: catan-mongodb
+    restart: unless-stopped
     environment:
-      - NODE_ENV=development
+      MONGO_INITDB_DATABASE: catan-game
     volumes:
-      - .:/app
-    working_dir: /app
-    command: sh -c "rm -rf node_modules/ && npm install && npm run build"
+      - mongodb_data:/data/db
+    networks:
+      - catan-network
     profiles:
-      - build
+      - dev
+      - test
+      - staging
+      - prod
 
-  app-dev:
-    <<: *node-image
+  # Client Development Server (React/Vite)
+  client-dev:
+    image: node:24.3.0-alpine
     user: "1000:1000"
-    container_name: template-dev
-    pull_policy: always
+    container_name: catan-client-dev
     environment:
       - NODE_ENV=development
+      - VITE_SERVER_URL=http://localhost:3001
     ports:
-      - 5173:5173
+      - "5173:5173"
     volumes:
-      - .:/app
+      - ./client:/app
     working_dir: /app
-    command: sh -c "rm -rf node_modules/ && npm install && npm run dev"
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - catan-network
     profiles:
       - dev
 
-  app-test:
-    <<: *node-image
+  # Server Development (Express/Socket.IO)
+  server-dev:
+    image: node:24.3.0-alpine
     user: "1000:1000"
-    container_name: template-test
-    pull_policy: always
+    container_name: catan-server-dev
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/catan-game
+      - CLIENT_URL=http://localhost:5173
+      - JWT_SECRET=dev-secret-key-change-in-production
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - catan-network
+    depends_on:
+      - mongodb
+    profiles:
+      - dev
+
+  # =============================================================================
+  # TESTING ENVIRONMENT
+  # =============================================================================
+
+  # Client Tests
+  client-test:
+    image: node:24.3.0-alpine
+    user: "1000:1000"
+    container_name: catan-client-test
     environment:
       - NODE_ENV=test
     volumes:
-      - .:/app
+      - ./client:/app
     working_dir: /app
-    command: sh -c "rm -rf node_modules/ && npm install && npm run test -- --run"
+    command: sh -c "npm install && npm run test -- --run"
     profiles:
       - test
+
+  # Server Tests
+  server-test:
+    image: node:24.3.0-alpine
+    user: "1000:1000"
+    container_name: catan-server-test
+    environment:
+      - NODE_ENV=test
+      - MONGODB_URI=mongodb://mongodb:27017/catan-game-test
+    volumes:
+      - ./server:/app
+    working_dir: /app
+    command: sh -c "npm install && npm run test -- --run"
+    networks:
+      - catan-network
+    depends_on:
+      - mongodb
+    profiles:
+      - test
+
+  # =============================================================================
+  # STAGING ENVIRONMENT (Private Network - *.ts.chis.dev)
+  # =============================================================================
 
   app-staging:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: website-template-staging
-    restart: always
+    container_name: catan-game-staging
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=staging
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/catan-game-staging
+      - CLIENT_URL=https://test.ts.chis.dev
+      - JWT_SECRET=${JWT_SECRET_STAGING:-staging-secret-change-me}
     networks:
       - private
+      - catan-network
+  # ports removed, only accessible via Traefik
+    depends_on:
+      - mongodb
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.template-staging.rule=Host(`test.ts.chis.dev`)"
-      - "traefik.http.routers.template-staging.entrypoints=websecure"
-      - "traefik.http.routers.template-staging.tls.certresolver=cloudflare"
-      - "traefik.http.services.template-staging.loadbalancer.server.port=80"
+      - "traefik.http.routers.catan-staging.rule=Host(`test.ts.chis.dev`)"
+      - "traefik.http.routers.catan-staging.entrypoints=websecure"
+      - "traefik.http.routers.catan-staging.tls.certresolver=cloudflare"
+      - "traefik.http.services.catan-staging.loadbalancer.server.port=3001"
       - "traefik.docker.network=private"
     profiles:
       - staging
 
-  app:
+  # =============================================================================
+  # PRODUCTION ENVIRONMENT (Public Network - catan.chis.dev)
+  # =============================================================================
+
+  app-prod:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: website-template-prod
-    restart: always
+    container_name: catan-game-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=${MONGODB_URI_PROD:-mongodb://mongodb:27017/catan-game}
+      - CLIENT_URL=https://catan.chis.dev
+      - JWT_SECRET=${JWT_SECRET_PROD}
     networks:
       - public
+      - catan-network
+    depends_on:
+      - mongodb
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.template-prod.rule=Host(`test.chis.dev`)"
-      - "traefik.http.routers.template-prod.entrypoints=websecure"
-      - "traefik.http.routers.template-prod.tls.certresolver=cloudflare"
-      - "traefik.http.services.template-prod.loadbalancer.server.port=80"
+      - "traefik.http.routers.catan-prod.rule=Host(`catan.chis.dev`)"
+      - "traefik.http.routers.catan-prod.entrypoints=websecure"
+      - "traefik.http.routers.catan-prod.tls.certresolver=cloudflare"
+      - "traefik.http.services.catan-prod.loadbalancer.server.port=3001"
       - "traefik.docker.network=public"
     profiles:
       - prod
+
+volumes:
+  mongodb_data:

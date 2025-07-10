@@ -8,16 +8,49 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "rootDir": "./src",
+        "rootDir": "../",
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
         "removeComments": false,
         "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "moduleDetection": "force",
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "isolatedModules": true,
+        "types": [
+            "node",
+            "vitest/globals"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "@/models/*": [
+                "./src/models/*"
+            ],
+            "@/game/*": [
+                "./src/game/*"
+            ],
+            "@/services/*": [
+                "./src/services/*"
+            ],
+            "@/routes/*": [
+                "./src/routes/*"
+            ],
+            "@/socket/*": [
+                "./src/socket/*"
+            ],
+            "@/utils/*": [
+                "./src/utils/*"
+            ]
+        }
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "../src/types/**/*"
     ],
     "exclude": [
         "node_modules",
