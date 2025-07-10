@@ -31,5 +31,6 @@
     "typescriptreact": "html"
   },
   "testing.automaticallyOpenPeekView": "never",
-  "vitest.enable": true
+  "vitest.enable": true,
+  "chat.agent.maxRequests": 500
 }
