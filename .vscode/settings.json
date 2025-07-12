@@ -3,7 +3,9 @@
     "docker ps": true,
     "docker logs": true,
     "npm audit": true,
-    "npm audit fix": true
+    "npm audit fix": true,
+    "/npx vitest run .*/": true,
+    "npx vitest run src/__tests__/socket/*": true
   },
   "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.suggest.autoImports": true,

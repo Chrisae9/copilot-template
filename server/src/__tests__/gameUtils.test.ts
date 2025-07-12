@@ -19,7 +19,7 @@ import {
     validateRoomCode,
     validateUsername
 } from '../utils/gameUtils.js';
-import './setup.js';
+import './setup.ts';
 describe('Catan Type Definitions', () => {
     it('should allow construction of a minimal valid GameState', () => {
         const state: GameState = {

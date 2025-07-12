@@ -20,93 +20,42 @@
         "-c",
         "chmod +x scripts/bootstrap.sh && ./scripts/bootstrap.sh"
       ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
       "detail": "Install all node_modules for root, client, and server using Docker (for VS Code intellisense and Problems tab)"
     },
-    // =============================================================================
-    // DEVELOPMENT TASKS
-    // =============================================================================
     {
-      "label": "Dev: Start Full Stack",
+      "label": "Test: Run Client Tests",
       "type": "shell",
-      "command": "docker",
+      "command": "npx",
       "args": [
-        "compose",
-        "--profile",
-        "dev",
-        "up",
-        "mongodb",
-        "client-dev",
-        "server-dev"
+        "vitest",
+        "run",
+        "--reporter=verbose"
       ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
+      "options": {
+        "cwd": "${workspaceFolder}/client"
       },
-      "isBackground": true,
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "problemMatcher": [],
-      "detail": "Start MongoDB + Client (5173) + Server (3001) for local development"
-    },
-    {
-      "label": "Dev: Stop All",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "compose",
-        "--profile",
-        "dev",
-        "down"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "detail": "Stop all development containers"
-    },
-    // =============================================================================
-    // TESTING TASKS
-    // =============================================================================
-    {
-      "label": "Test: Run All Tests",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "compose",
-        "--profile",
-        "test",
-        "up",
-        "--abort-on-container-exit",
-        "--build"
-      ],
       "group": {
         "kind": "test",
         "isDefault": true
       },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
+      "detail": "Run all client tests using Vitest with jsdom environment."
+    },
+    {
+      "label": "Test: Run Server Tests",
+      "type": "shell",
+      "command": "npx",
+      "args": [
+        "vitest",
+        "run",
+        "--reporter=verbose"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/server"
       },
-      "problemMatcher": [],
-      "detail": "Run all client and server tests in Docker test containers (clean, reproducible) with correct user permissions to avoid EACCES errors."
+      "group": {
+        "kind": "test"
+      },
+      "detail": "Run all server tests using Vitest with node environment."
     },
     // =============================================================================
     // STAGING DEPLOYMENT (Private Network - test.ts.chis.dev)

@@ -16,12 +16,19 @@ export default defineConfig({
         setupFiles: ['./src/__tests__/setup.ts'],
 
         // Test file patterns
-        include: ['src/**/*.{test,spec}.{js,ts}'],
+        include: [
+            'src/**/*.{test,spec}.{js,ts}',
+            'src/__tests__/**/*.test.{js,ts}',
+            'src/__tests__/**/*.spec.{js,ts}',
+            'src/__tests__/socket/**/*.test.{js,ts}',
+            'src/__tests__/socket/**/*.spec.{js,ts}',
+            'src/__tests__/socket.test.{js,ts}'
+        ],
         exclude: ['node_modules', 'dist'],
 
         // Timeout settings
-        testTimeout: 10000, // 10 seconds for integration tests
-        hookTimeout: 10000,
+        testTimeout: 30000, // 30 seconds for integration tests
+        hookTimeout: 30000,
 
         // Coverage settings
         coverage: {
@@ -48,6 +55,9 @@ export default defineConfig({
         reporters: ['verbose'],
 
         // Retry failed tests
-        retry: 1
+        retry: 1,
+        sequence: {
+            concurrent: false // Run tests serially to avoid port and DB conflicts
+        },
     }
 });

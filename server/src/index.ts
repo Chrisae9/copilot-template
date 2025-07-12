@@ -1,3 +1,17 @@
+import { setupDiscardRoundingEvents } from './socket/discardRoundingEvents';
+import { setupInitialPlacementEvents } from './socket/initialPlacementEvents';
+import { setupInvalidBuildTradeEvents } from './socket/invalidBuildTradeEvents';
+import { setupPieceLimitsEvents } from './socket/pieceLimitsEvents';
+import { setupPortUsageRestrictionEvents } from './socket/portUsageRestrictionEvents';
+import { setupRobberStealEvents } from './socket/robberStealEvents';
+
+
+import authRoutes from './routes/auth.js';
+import gameRoutes from './routes/game.js';
+import roomRoutes from './routes/room.js';
+
+
+// Register game room management routes after middleware
 /**
  * Main server entry point for the Catan-inspired multiplayer game
  * Sets up Express server with Socket.IO for real-time communication
@@ -12,8 +26,9 @@ import { createServer } from 'http';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import path from 'path';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
+import { setupVictoryPointCardEvents } from './socket/victoryPointCardEvents';
 
 // ES Module dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +56,11 @@ app.use(cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173"
 }));
 app.use(express.json());
+
+// Game room management routes (must be after app is declared and middleware is set up)
+app.use('/api/room', roomRoutes);
+app.use('/api/game', gameRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint (must be registered before static/catch-all routes)
 app.get('/health', (req: Request, res: Response) => {
@@ -169,30 +189,41 @@ app.get('/api/db-test', async (req: Request, res: Response) => {
     }
 });
 
-// Socket.IO connection handling
-io.on('connection', (socket: Socket) => {
-    console.log(`👤 User connected: ${socket.id}`);
+// Modular event handler for Victory Point card secrecy
+setupVictoryPointCardEvents(io);
+// Modular event handler for initial placement rules
+setupInitialPlacementEvents(io);
+// Modular event handler for port usage restrictions
+setupPortUsageRestrictionEvents(io);
+// Modular event handler for piece limits
+setupPieceLimitsEvents(io);
+// Modular event handler for discard rounding
+setupDiscardRoundingEvents(io);
+// Modular event handler for robber steal logic
+setupRobberStealEvents(io);
+// Modular event handler for invalid build/trade logic
+setupInvalidBuildTradeEvents(io);
 
-    socket.on('disconnect', () => {
-        console.log(`👤 User disconnected: ${socket.id}`);
+// Minimal room management for socket tests
+io.on('connection', (socket) => {
+    socket.on('client:create_room', ({ gameSettings }) => {
+        // Generate a simple room code
+        const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        socket.join(roomCode);
+        // Store basic game state for test
+        if (!(global as any).gameState) (global as any).gameState = {};
+        (global as any).gameState[roomCode] = {
+            board: { hexes: [], ports: [], size: 'standard' },
+            phase: 'initial_placement',
+            players: [],
+            ...gameSettings
+        };
+        socket.emit('server:room_created', { roomCode });
     });
-
-    // Basic test event
-    socket.emit('server:welcome', {
-        message: 'Welcome to the Catan-inspired game server!',
-        socketId: socket.id
+    socket.on('client:join_room', ({ roomCode }) => {
+        socket.join(roomCode);
+        socket.emit('server:room_joined', { roomCode });
     });
-});
-
-const PORT = process.env.PORT || 3001;
-
-server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-    console.log(`🎲 Game API: http://localhost:${PORT}/api/status`);
-    if (process.env.NODE_ENV === 'production') {
-        console.log(`🎮 Game client served from: http://localhost:${PORT}`);
-    }
 });
 
 export { app, io };

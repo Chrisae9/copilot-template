@@ -1,3 +1,14 @@
+/**
+ * Generates a minimal initial game state for a new game
+ * @param players - array of player IDs
+ * @returns {object} gameState with board and players
+ */
+export function generateInitialGameState(players: string[]) {
+    return {
+        board: generateBoard('standard'),
+        players: players.map(id => ({ userId: id })),
+    };
+}
 import type { Board, Hex, Port, Resources, TerrainType } from '../../../src/types/catan';
 
 /**
@@ -19,6 +30,13 @@ export function generateBoard(size: 'standard' | 'extended' = 'standard'): Board
          * Standard 3-4 player board configuration
          * 19 hexes, 1 desert, 9 ports
          */
+        // Axial coordinates for standard board (centered at 0,0)
+        const axialCoords = [
+            { q: 0, r: 0 },
+            { q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 }, { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 },
+            { q: 2, r: 0 }, { q: 2, r: -1 }, { q: 2, r: -2 }, { q: 1, r: -2 }, { q: 0, r: -2 }, { q: -1, r: -1 },
+            { q: -2, r: 0 }, { q: -2, r: 1 }, { q: -2, r: 2 }, { q: -1, r: 2 }, { q: 0, r: 2 }, { q: 1, r: 1 }
+        ];
         const terrainList: TerrainType[] = [
             'hills', 'hills', 'hills',
             'forest', 'forest', 'forest', 'forest',
@@ -27,18 +45,70 @@ export function generateBoard(size: 'standard' | 'extended' = 'standard'): Board
             'pasture', 'pasture', 'pasture', 'pasture',
             'desert'
         ];
-        // Official number tokens for standard board (no 7, 1 desert)
+        function shuffle<T>(arr: T[]): T[] {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                if (a[i] !== undefined && a[j] !== undefined) {
+                    const temp = a[i] as T;
+                    a[i] = a[j] as T;
+                    a[j] = temp;
+                }
+            }
+            return a;
+        }
         const numberTokens = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
-        let tokenIdx = 0;
-        const hexes: Hex[] = terrainList.map((terrain, i) => {
-            const isDesert = terrain === 'desert';
-            return {
-                coordinates: { q: 0, r: i },
-                terrain,
-                numberToken: isDesert ? null : numberTokens[tokenIdx++]!,
-                hasRobber: isDesert,
-            };
-        });
+        // Helper to get adjacent hexes by axial coordinates
+        function getAdjacentHexes(hex: { q: number; r: number }, allHexes: { q: number; r: number; numberToken: number | null }[]) {
+            const directions = [
+                { q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 },
+                { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 }
+            ];
+            return directions
+                .map(dir => {
+                    const neighborQ = hex.q + dir.q;
+                    const neighborR = hex.r + dir.r;
+                    return allHexes.find(h => h.q === neighborQ && h.r === neighborR);
+                })
+                .filter(Boolean);
+        }
+        // Retry shuffling until no adjacent 6/8 tokens
+        let hexes: Hex[] = [];
+        let maxTries = 1000;
+        while (maxTries-- > 0) {
+            const terrainShuffled = shuffle(terrainList);
+            if (terrainShuffled.length !== axialCoords.length) {
+                throw new Error('Terrain list and axial coordinates length mismatch');
+            }
+            const numberTokensShuffled = shuffle(numberTokens);
+            let tokenIdx = 0;
+            hexes = axialCoords.map((coord, i) => {
+                const terrain = terrainShuffled[i];
+                if (!terrain) throw new Error('Terrain undefined for hex coordinate');
+                const isDesert = terrain === 'desert';
+                return {
+                    coordinates: { q: coord.q, r: coord.r },
+                    terrain,
+                    numberToken: isDesert ? null : numberTokensShuffled[tokenIdx++]!,
+                    hasRobber: isDesert,
+                };
+            });
+            // Check for adjacent 6/8 tokens
+            const sixEightHexes = hexes.filter(h => h.numberToken === 6 || h.numberToken === 8);
+            let hasAdjacent = false;
+            for (const hex of sixEightHexes) {
+                const neighbors = getAdjacentHexes(hex.coordinates, hexes.map(h => ({ q: h.coordinates.q, r: h.coordinates.r, numberToken: h.numberToken })));
+                for (const neighbor of neighbors) {
+                    if (neighbor && (neighbor.numberToken === 6 || neighbor.numberToken === 8)) {
+                        hasAdjacent = true;
+                        break;
+                    }
+                }
+                if (hasAdjacent) break;
+            }
+            if (!hasAdjacent) break;
+        }
+        if (maxTries <= 0) throw new Error('Failed to generate board without adjacent 6/8 tokens after 1000 tries');
         // Port order and coordinates (clockwise from top)
         const portOrder: { resource: keyof Resources | 'any'; ratio: number }[] = [
             { resource: 'any', ratio: 3 },

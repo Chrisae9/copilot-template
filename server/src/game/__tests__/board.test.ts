@@ -83,10 +83,37 @@ describe('Board Generation', () => {
         expect(tokens).toEqual([...STANDARD_NUMBER_TOKENS].sort((a, b) => a - b));
     });
 
+    /**
+     * Returns all adjacent hexes for a given hex using axial coordinates.
+     * @param hex The hex to find neighbors for
+     * @param allHexes The list of all hexes on the board
+     */
+    function getAdjacentHexes(hex: { coordinates: { q: number; r: number } }, allHexes: { coordinates: { q: number; r: number }; numberToken: number | null }[]) {
+        // Axial directions for hex grid
+        const directions = [
+            { q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 },
+            { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 }
+        ];
+        return directions
+            .map(dir => {
+                const neighborQ = hex.coordinates.q + dir.q;
+                const neighborR = hex.coordinates.r + dir.r;
+                return allHexes.find(h => h.coordinates.q === neighborQ && h.coordinates.r === neighborR);
+            })
+            .filter(Boolean);
+    }
+
     it('should not place 6 and 8 tokens on adjacent hexes', () => {
-        // This test will be implemented after adjacency logic is available
-        // Placeholder for now
-        expect(true).toBe(true);
+        const board: Board = generateBoard('standard');
+        const sixEightHexes = board.hexes.filter(h => h.numberToken === 6 || h.numberToken === 8);
+        for (const hex of sixEightHexes) {
+            const neighbors = getAdjacentHexes(hex, board.hexes);
+            for (const neighbor of neighbors) {
+                if (neighbor && (neighbor.numberToken === 6 || neighbor.numberToken === 8)) {
+                    throw new Error(`Adjacent 6/8 tokens found at (${hex.coordinates.q},${hex.coordinates.r}) and (${neighbor.coordinates.q},${neighbor.coordinates.r})`);
+                }
+            }
+        }
     });
 
     it('should generate correct number of ports', () => {

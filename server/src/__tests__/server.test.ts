@@ -1,3 +1,115 @@
+// --- User Authentication Tests (TDD) ---
+
+import mongoose from 'mongoose';
+import User from '../models/User';
+import { beforeAll, afterAll } from 'vitest';
+
+describe('User Authentication', () => {
+    const testUser = { username: 'testuser', email: 'testuser@example.com', password: 'TestPass123!' };
+    let testUserToken: string;
+
+    beforeAll(async () => {
+        // Clean up any existing test user before starting
+        await User.deleteMany({ email: testUser.email });
+        // Register the test user for login tests
+        await request(app)
+            .post('/api/auth/register')
+            .send(testUser)
+            .expect(201);
+        // Login and set token for protected endpoint test
+        const loginResponse = await request(app)
+            .post('/api/auth/login')
+            .send({ email: testUser.email, password: testUser.password })
+            .expect(200);
+        testUserToken = loginResponse.body.token;
+    });
+
+    afterAll(async () => {
+        // Clean up only the test user after all tests
+        await User.deleteMany({ email: testUser.email });
+        await mongoose.connection.close();
+    });
+
+    it('should register a new user successfully', async () => {
+        // Use a unique user for this test to avoid duplicate registration
+        const uniqueUser = { username: `user_${Date.now()}`, email: `user_${Date.now()}@example.com`, password: 'TestPass123!' };
+        const response = await request(app)
+            .post('/api/auth/register')
+            .send(uniqueUser)
+            .expect(201);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body.user).toMatchObject({ username: uniqueUser.username, email: uniqueUser.email });
+        expect(response.body).toHaveProperty('token');
+    });
+
+    it('should not allow duplicate registration', async () => {
+        const response = await request(app)
+            .post('/api/auth/register')
+            .send(testUser)
+            .expect(409);
+        expect(response.body).toHaveProperty('error');
+    });
+
+    it('should not register with invalid data', async () => {
+        const response = await request(app)
+            .post('/api/auth/register')
+            .send({ username: '', email: 'bad', password: '' })
+            .expect(400);
+        expect(response.body).toHaveProperty('error');
+    });
+
+    it('should login with correct credentials', async () => {
+        const response = await request(app)
+            .post('/api/auth/login')
+            .send({ email: testUser.email, password: testUser.password })
+            .expect(200);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body).toHaveProperty('token');
+        testUserToken = response.body.token;
+    });
+
+    it('should not login with wrong password', async () => {
+        const response = await request(app)
+            .post('/api/auth/login')
+            .send({ email: testUser.email, password: 'WrongPass!' })
+            .expect(401);
+        expect(response.body).toHaveProperty('error');
+    });
+
+    it('should not login with non-existent user', async () => {
+        const response = await request(app)
+            .post('/api/auth/login')
+            .send({ email: 'nouser@example.com', password: 'irrelevant' })
+            .expect(401);
+        expect(response.body).toHaveProperty('error');
+    });
+
+    it('should access a JWT-protected endpoint with valid token', async () => {
+        // Ensure login has occurred and token is set
+        expect(testUserToken).toBeDefined();
+        const response = await request(app)
+            .get('/api/auth/me')
+            .set('Authorization', `Bearer ${testUserToken}`)
+            .expect(200);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body.user).toMatchObject({ username: testUser.username, email: testUser.email });
+    });
+
+    it('should reject access to JWT-protected endpoint with invalid token', async () => {
+        const response = await request(app)
+            .get('/api/auth/me')
+            .set('Authorization', 'Bearer invalidtoken')
+            .expect(401);
+        expect(response.body).toHaveProperty('error');
+    });
+
+    it('should reject access to JWT-protected endpoint with no token', async () => {
+        const response = await request(app)
+            .get('/api/auth/me')
+            .expect(401);
+        expect(response.body).toHaveProperty('error');
+    });
+});
 /**
  * Server integration tests
  * Tests the main Express server functionality, health endpoints, and basic API routes
@@ -6,7 +118,7 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { app } from '../index.js';
-import './setup.js';
+import './setup.ts';
 
 describe('Server Integration Tests', () => {
     describe('Health Check Endpoint', () => {

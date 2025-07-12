@@ -24,6 +24,8 @@ services:
       MONGO_INITDB_DATABASE: catan-game
     volumes:
       - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
     networks:
       - catan-network
     profiles:
@@ -39,7 +41,7 @@ services:
     container_name: catan-client-dev
     environment:
       - NODE_ENV=development
-      - VITE_SERVER_URL=http://localhost:3001
+      - VITE_SOCKET_SERVER_URL=http://localhost:3001
     ports:
       - "5173:5173"
     volumes:
@@ -86,10 +88,15 @@ services:
     container_name: catan-client-test
     environment:
       - NODE_ENV=test
+      - DOCKER=1
     volumes:
       - ./client:/app
     working_dir: /app
     command: sh -c "npm install && npm run test -- --run"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2g
     profiles:
       - test
 
@@ -101,10 +108,15 @@ services:
     environment:
       - NODE_ENV=test
       - MONGODB_URI=mongodb://mongodb:27017/catan-game-test
+      - DOCKER=1
     volumes:
       - ./server:/app
     working_dir: /app
-    command: sh -c "npm install && npm run test -- --run"
+    command: sh -c "npm install && npx vitest --run --reporter=verbose --include src/__tests__/socket.test.ts src/__tests__/**/*.test.ts src/__tests__/socket/**/*.test.ts"
+    deploy:
+      resources:
+        limits:
+          memory: 2g
     networks:
       - catan-network
     depends_on:

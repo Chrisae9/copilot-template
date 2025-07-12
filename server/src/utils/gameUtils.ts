@@ -122,3 +122,66 @@ export function sanitizeInput(input: string): string {
     // Trim whitespace
     return sanitized.trim();
 }
+
+/**
+ * Calculates the longest continuous road for each player and determines the owner.
+ * If two or more players tie for the longest road (>=5), returns null (no owner).
+ * @param players Array of PlayerState
+ * @returns { playerId: string | null, length: number } | null
+ */
+export function calculateLongestRoad(players: Array<{ userId: string, pieces: { roads: Array<{ coordinates: [{ q: number, r: number }, { q: number, r: number }], playerId: string }> } }>): { playerId: string | null, length: number } | null {
+    // Helper: build adjacency map for each player's roads
+    function buildGraph(roads: Array<{ coordinates: [{ q: number, r: number }, { q: number, r: number }] }>) {
+        const graph: Record<string, Set<string>> = {};
+        for (const road of roads) {
+            const [a, b] = road.coordinates;
+            const keyA = `${a.q},${a.r}`;
+            const keyB = `${b.q},${b.r}`;
+            if (!graph[keyA]) graph[keyA] = new Set();
+            if (!graph[keyB]) graph[keyB] = new Set();
+            graph[keyA].add(keyB);
+            graph[keyB].add(keyA);
+        }
+        return graph;
+    }
+    // Helper: DFS to find longest path in player's road graph
+    function longestPath(graph: Record<string, Set<string>>): number {
+        let maxLen = 0;
+        const keys = Object.keys(graph);
+        for (const start of keys) {
+            const visited = new Set<string>();
+            function dfs(node: string, length: number) {
+                visited.add(node);
+                maxLen = Math.max(maxLen, length);
+                const neighbors = graph[node];
+                if (neighbors) {
+                    for (const neighbor of neighbors) {
+                        if (!visited.has(neighbor)) {
+                            dfs(neighbor, length + 1);
+                        }
+                    }
+                }
+                visited.delete(node);
+            }
+            dfs(start, 0);
+        }
+        return maxLen;
+    }
+    // Calculate longest road for each player
+    const results: Array<{ playerId: string, length: number }> = [];
+    for (const player of players) {
+        const graph = buildGraph(player.pieces.roads);
+        const length = longestPath(graph);
+        results.push({ playerId: player.userId, length });
+    }
+    // Find max length
+    const maxLength = Math.max(...results.map(r => r.length));
+    if (maxLength < 5) return null; // No one qualifies
+    // Find all players with max length
+    const contenders = results.filter(r => r.length === maxLength);
+    if (contenders.length === 1 && contenders[0]) {
+        return { playerId: contenders[0].playerId, length: maxLength };
+    }
+    // Tie: no owner
+    return null;
+}
